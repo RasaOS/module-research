@@ -1,0 +1,100 @@
+{
+  "$schema": "https://rasa-os.github.io/schema/rasa.schema.v1.json",
+  "contract_version": "1.3.0",
+  "name": "rasa.module.research",
+  "version": "0.1.0",
+  "kind": "module",
+  "aliases": [
+    "module-research"
+  ],
+  "description": "Portable research workspace, mountable into any domain or orchestrator. Two capabilities: (1) TRACK — a standard folder-per-topic structure (README + log + findings + sources + open-questions) with an open→active⇄dormant→concluded→archived lifecycle and a regenerable research/INDEX.md; (2) CROSS-REFERENCE / MATCH — a layered linking system (@path context pointers + [[topic-slug]] wikilinks for the bidirectional topic graph + tags/related frontmatter for matching), with back-reference computation and tag-based discovery. The one per-project concern — where topics live, the tag taxonomy, and where a concluded finding graduates — is delegated to a project-owned .claude/research-canon.md seam.",
+  "source": {
+    "repo": "https://github.com/RasaOS/module-research",
+    "branch": "main"
+  },
+  "tier": "Pro",
+  "capabilities": [
+    "research.topic-tracking",
+    "research.topic-lifecycle",
+    "research.cross-reference",
+    "research.matching-discovery"
+  ],
+  "permissions": [
+    "fs:read",
+    "fs:write",
+    "shell:exec"
+  ],
+  "requires": {
+    "parent_kind": [
+      "domain",
+      "orchestrator"
+    ]
+  },
+  "rasa": {
+    "role": "L1-mountable-capability",
+    "shape_pattern": "toolkit",
+    "note": "Greenfield module (not a distillation of existing implementations — contrast module.tasks/module.notes, which were extract-after-proof). Author-requested to do two fundamental things: track ongoing research topics as structured folders, and cross-reference/match them internally. Ships a full working v0.1.0 (spine + seam + three skills + per-topic templates + scaffolded index), not a spec-only shell. The horizontal core is the topic structure + the three-layer cross-reference model in content/research-rules.md; the one vertical concern — research root, tag taxonomy, and promotion target — lives in the project-owned .claude/research-canon.md seam (the analogue of module.tasks' done-gate and module.notes' notes-canon). /research conclude hard-stops if the seam's promotion_target is unfilled. Cross-references to the memory siblings are SOFT and load-bearing: module.notes is the primary promotion target for a concluded finding (research is the workshop, notes the ledger); the kernel similarity-recall memory (module.ingest) is a different primitive (recall-by-meaning, NOT this module's linked-corpus retrieval) — never build vector search here. Neither is hardened into requires.elements[]."
+  },
+  "element": {
+    "description": "Element-owned research files mirrored into the install target's .claude/ per canon ELEMENT_CONTRACT.md §7. Refreshed on Element upgrade. The research-canon seam and the live topic corpus are NOT here — they are project-owned (see seed.files).",
+    "files": [
+      {
+        "from": "content/research-rules.md",
+        "to": ".claude/research-rules.md",
+        "policy": "file-replace",
+        "note": "The portable research spine: the topic model + per-topic structure, the open→active⇄dormant→concluded→archived lifecycle, the three-layer cross-reference/matching model (@path / [[slug]] / tags+related), the INDEX conventions, the conclude/promotion flow, and the boundary against the memory siblings (module.notes, kernel similarity-recall). Element-owned; refreshed on upgrade. References .claude/research-canon.md for the per-project seam; it hardcodes none of it."
+      },
+      {
+        "from": "content/topic-template/",
+        "to": ".claude/research-topic-template/",
+        "policy": "directory-mirror",
+        "note": "The five per-topic skeleton files (README/log/findings/sources/open-questions) that /research new instantiates into research/<slug>/, with {{RT_ID}}/{{TOPIC_SLUG}}/{{TOPIC_TITLE}}/{{DRIVING_QUESTION}}/{{TODAY}} placeholders the skill fills. Element-owned; refreshed on upgrade."
+      },
+      {
+        "from": "content/skills/",
+        "to": ".claude/skills/",
+        "policy": "directory-mirror",
+        "note": "The three research skills: /research (topic lifecycle — create, log, findings, status, conclude), /link (author the three cross-reference layers), /xref (resolve + discover — back-references, tag-matching, the graph map, health). Element-owned; refreshed on upgrade."
+      },
+      {
+        "from": "content/README.md",
+        "to": "content/README.md",
+        "policy": "opt-in",
+        "note": "Describes what this module ships and how it installs. Fork/author-time doc; not installed into consumer projects."
+      },
+      {
+        "from": "content/BUILD_PLAN.md",
+        "to": "content/BUILD_PLAN.md",
+        "policy": "opt-in",
+        "note": "The v0.1.0 specification + design record (why the module exists, the entity model, the two capabilities, the three-skill contract, the seam, the memory-sibling boundary, the version plan). Author-time doc; not installed into consumer projects."
+      }
+    ]
+  },
+  "seed": {
+    "description": "One-time, project-owned files copied at install only (skip-if-exists), per canon ELEMENT_CONTRACT.md §7. These belong to the consuming project after install and are never overwritten on Element upgrade — the research-canon adapter seam and the live index.",
+    "files": [
+      {
+        "from": "seed/research-canon.md.template",
+        "to": ".claude/research-canon.md",
+        "policy": "skip-if-exists",
+        "note": "The per-project adapter seam — the ONE thing that varies per vertical: the research root, the tag taxonomy, the promotion target (where a concluded finding graduates), and the promotion criteria. Project-owned; the project fills it. /research conclude hard-stops until promotion_target is set. Ships with honest defaults + commented per-vertical examples; placeholder-free per the documented skip-if-exists policy gap."
+      },
+      {
+        "from": "seed/research/INDEX.md.template",
+        "to": "research/INDEX.md",
+        "policy": "skip-if-exists",
+        "note": "The topic registry + map (the rollup of topic frontmatter). Project-owned; grows over the project's life. Carries the <!-- BEGIN/END XREF MAP --> block that /xref map writes into. Seeding this file also creates the research/ root directory."
+      },
+      {
+        "from": "seed/rasa.lock.json.template",
+        "to": ".claude/rasa.lock.json",
+        "policy": "init-only-with-sha",
+        "note": "Stamped with the Element HEAD commit SHA at init time. Lockfile shape per canon Spec §6 (Connection Contract). When co-installed under a parent that also stamps a lockfile, the parent's is authoritative (single-writer-per-path, Lock L-004). Substitutes {{ELEMENT_NAME}}, {{ELEMENT_KIND}}, {{ELEMENT_VERSION}}, {{ELEMENT_REPO}}, {{ELEMENT_BRANCH}}, {{ELEMENT_SHA}}, {{TODAY}} via bin/init."
+      }
+    ]
+  },
+  "scaffold": {
+    "description": "Empty directories created at init by the declarative installer. The research/ root ships via the seeded INDEX.md; per-topic folders are created on demand by /research new. So this stays empty (bin/init does not implement scaffold.directories).",
+    "directories": []
+  }
+}

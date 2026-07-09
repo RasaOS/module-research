@@ -1,0 +1,108 @@
+# Research Canon — project adapter seam
+
+This is the **one file `rasa.module.research` does not decide for you.** It
+holds the three things that genuinely vary per project. It is **project-owned**:
+seeded once at install and never overwritten on Element upgrade. Fill it in.
+
+The portable discipline (the topic structure, the lifecycle, the three-layer
+cross-reference model) lives in `.claude/research-rules.md` and refreshes on
+upgrade. This seam is where *your project's* specifics go. The `/research`,
+`/link`, and `/xref` skills read this file; `/research conclude` **hard-stops**
+if `promotion_target` below is empty.
+
+---
+
+## 1. `research_root`
+
+Where topic folders and `INDEX.md` live, relative to the project root.
+
+    research_root: research/
+
+<!-- Default `research/`. Change only if your project keeps investigations
+     elsewhere (e.g. `docs/research/`, `notes/investigations/`). -->
+
+---
+
+## 2. `tags` — the taxonomy
+
+The controlled vocabulary of topic tags for this project. `/link` and
+`/research` draw tags only from this list; `/xref` matches on it. Keep it
+small and real — tags are for *matching across topics*, so a tag that only
+ever applies to one topic earns nothing.
+
+    tags:
+      # - <tag>            # <one-line meaning>
+
+<!-- Fill with YOUR project's subjects. Illustrative sets (delete these):
+     software:  [architecture, api, security, performance, tooling, protocol]
+     legal:     [statute, case-law, contract, regulatory, precedent]
+     health:    [pathway, guideline, pharmacology, diagnostics, outcomes]
+     physics:   [symmetry, spin, measurement, spectral, parity, lattice]
+     writing:   [character, plot, world, voice, period, structure]
+     A tag not in this list is a deliberate taxonomy change — add it here
+     first, don't sprinkle ad-hoc tags the matcher can't rely on. -->
+
+---
+
+## 3. `promotion_target` — where a concluded finding graduates
+
+**Required for `/research conclude`.** When a topic concludes, its findings
+graduate out of the research workspace into your project's durable layer.
+Name that target here. Until this is set, `/research conclude` refuses to run
+(guessing where a finding becomes durable is the one inference the module
+won't make).
+
+    promotion_target:
+      # kind:   <notes-decision | domain-content | spec-or-rule | canon | other>
+      # path:   <where it lands, e.g. notes/DECISIONS.md, content/, canon/…>
+      # note:   <anything the conclude step should know>
+
+<!-- Common targets (pick what fits; delete the rest):
+
+  # A rasa.module.notes decision — the most common, cleanest hand-off.
+  # Research answers "what did we find?"; notes records "so we decided X".
+  promotion_target:
+    kind: notes-decision
+    path: notes/DECISIONS.md
+
+  # Reference material the domain ships.
+  promotion_target:
+    kind: domain-content
+    path: content/
+
+  # A rule that changes how work is done.
+  promotion_target:
+    kind: spec-or-rule
+    path: CLAUDE.md
+-->
+
+---
+
+## 4. `promotion_criteria` — when a topic is ready to conclude (optional)
+
+Overrides the default. Absent an override, `/research conclude` uses:
+*the driving question has a stable, evidenced answer, and something depends on
+it.*
+
+    promotion_criteria:
+      # - <your project's bar for concluding a topic>
+
+<!-- Use this to encode a hard gate. Example (this workspace): a finding may
+     not be promoted to canon until a canon *task* exists — so conclude must
+     refuse and point at the task workflow. Encode that here:
+     promotion_criteria:
+       - Promotion to canon/ requires an open canon task first (see canon/tasks/).
+-->
+
+---
+
+## 5. Sibling modules present (optional)
+
+If these are mounted, the skills use them; if not, they degrade gracefully.
+Note which are present so `conclude` and logging know what's available.
+
+    siblings:
+      notes:  <present | absent>    # promotion target for concluded findings
+      tasks:  <present | absent>    # topics ↔ TASK-NNN cross-links
+      ingest: <present | absent>    # kernel similarity-recall (memory_store)
+      jobs:   <present | absent>    # scheduled dormant-topic review

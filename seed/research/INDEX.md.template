@@ -1,0 +1,41 @@
+# Research Index
+
+The registry and map of every research topic in this project, provided by
+`rasa.module.research`. Each topic is a folder under this directory with a
+standard structure (`README.md`, `log.md`, `findings.md`, `sources.md`,
+`open-questions.md`).
+
+- The rules that govern topics live in **`.claude/research-rules.md`**.
+- The per-project seam (research root, tag taxonomy, promotion target) is
+  **`.claude/research-canon.md`**.
+- `/research` maintains the roster below; `/xref map` refreshes the graph.
+
+This index is a **rollup** — each topic's `README.md` frontmatter is the
+source of truth for its status and tags. When they disagree, the frontmatter
+wins; re-run `/research` to reconcile.
+
+## Topics
+
+<!-- One row per topic, in id order. /research new adds a row; a status change
+     updates it. -->
+
+| Id | Topic | Status | Tags | Driving question |
+|----|-------|--------|------|------------------|
+| _(none yet — `/research new <title>` to start one)_ | | | | |
+
+## Lifecycle legend
+
+`open` → `active` ⇄ `dormant` → `concluded` → `archived`
+
+- **open** — registered, scoped, not yet worked.
+- **active** — under current investigation.
+- **dormant** — paused; question still open.
+- **concluded** — question answered; findings ready to promote.
+- **archived** — closed and set aside (never deleted).
+
+## Cross-reference map
+
+<!-- BEGIN XREF MAP -->
+_Not generated yet. Run `/xref map` to render the topic graph
+(outbound links, back-references, and tag clusters) here._
+<!-- END XREF MAP -->
