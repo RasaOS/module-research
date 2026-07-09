@@ -1,5 +1,8 @@
 # CLAUDE.md — `rasa.module.research`
 
+> **Who you are (SA-025).** `rasa.module.research` — the RasaOS module for research-topic tracking and cross-referencing. Substrate: **RasaOS**; role: **module**. On install `bin/init` renders this into `.claude/rasa-identity.md`; `/whoami` composes the full identity with the project's deployment layer.
+
+
 Per-repo working contract for Claude sessions opened inside this folder.
 Extends `~/.claude/CLAUDE.md` and the workspace `rasa.tenant.rasaos` tenant
 contract; does not override them. (Referenced by identity, not filesystem
